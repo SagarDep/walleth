@@ -3,6 +3,7 @@ package org.walleth.functions
 import org.walleth.data.tokens.Token
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.BigInteger.ZERO
 
 fun Token.decimalsInZeroes() = "0".repeat(decimals)
 fun Token.decimalsAsMultiplicator() = BigDecimal("1" + decimalsInZeroes())
@@ -22,7 +23,7 @@ fun BigDecimal.toValueString(token: Token) = applyTokenDecimals(token).let { val
         format
     }
     cutFormat
-            .addPrefixOnCondition(prefix = "~", condition = valueInETH.scale() > 6 || cutFormat != format)
+            .addPrefixOnCondition(prefix = "~", condition = valueInETH.scale() > 6 || format.replace(cutFormat, "").toBigIntegerOrNull()?: ZERO != ZERO)
             .stripTrailingZeros()
 }
 
@@ -33,4 +34,4 @@ fun BigDecimal.toFiatValueString() = twoDigitDecimalFormat.format(this)
 
 fun String.addPrefixOnCondition(prefix: String, condition: Boolean) = if (condition) prefix + this else this
 
-fun CharSequence.isValueImprecise() = length > 0 && this[0] == '~'
+fun CharSequence?.isValueImprecise() = this?.firstOrNull() == '~'
